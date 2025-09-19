@@ -78,6 +78,7 @@ class Environment(BaseModel):
         "venv",
         "uv-venv",
         "renv",
+        "nix",
     ]
     path: str | None = None
     description: str | None = None
@@ -115,6 +116,11 @@ class DockerEnvironment(Environment):
 
 class REnvironment(Environment):
     kind: Literal["renv"] = "renv"
+    prefix: str
+
+
+class NixEnvironment(Environment):
+    kind: Literal["nix"] = "nix"
     prefix: str
 
 

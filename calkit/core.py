@@ -319,6 +319,9 @@ def check_system_deps(
                 deps.append("julia")
             if "juliaup" not in deps:
                 deps.append("juliaup")
+        elif kind == "nix":
+            if "nix" not in deps:
+                deps.append("nix")
     for dep in deps:
         if isinstance(dep, dict):
             keys = list(dep.keys())

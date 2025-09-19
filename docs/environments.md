@@ -24,6 +24,7 @@ Calkit supports defining and running code in these environment types:
 - [Pixi](https://github.com/prefix-dev/pixi)
 - [`renv`](https://rstudio.github.io/renv/index.html)
 - `ssh`
+- [`nix`](https://nixos.org/)
 
 Environment definitions live in the project's `calkit.yaml` file
 in the `environments` section.

@@ -581,6 +581,83 @@ def new_notebook(
         repo.git.commit(["calkit.yaml", "-m", f"Add notebook {path}"])
 
 
+@new_app.command("nix-env")
+def new_nix_env(
+    name: Annotated[
+        str, typer.Option("--name", "-n", help="Environment name.")
+        ],
+    pkgs: Annotated[
+        list[str],
+        typer.Argument(help="Packages to include in the environment."),
+      ],
+    nixpkgs_url: Annotated[
+        str | None, typer.Option(
+            "--nixpkgs-url",
+            help="Nixpkgs URL to use in flake.nix."
+            )
+      ] = None
+):
+    pkgs_nix = "\n          ".join(pkgs)
+    if nixpkgs_url is None:
+      nixpkgs_url = "github:NixOS/nixpkgs/nixos-unstable"
+    flake_txt = f"""
+{{
+  description = "Nix-env: {name}";
+  inputs = {{
+    nixpkgs.url = "{nixpkgs_url}";
+  }};
+
+  outputs = {{
+    self,
+    nixpkgs,
+  }}: let
+    # Systems supported
+    allSystems = [
+      "x86_64-linux" # 64-bit Intel/AMD Linux
+      "aarch64-linux" # 64-bit ARM Linux
+      "x86_64-darwin" # 64-bit Intel macOS
+      "aarch64-darwin" # 64-bit ARM macOS
+    ];
+
+    # Helper to provide system-specific attributes
+    forAllSystems = f:
+      nixpkgs.lib.genAttrs allSystems (
+        system:
+          f {{
+            pkgs = import nixpkgs {{inherit system;}};
+          }}
+      );
+  in {{
+    devShells = forAllSystems ({{pkgs}}: {{
+      {name} = pkgs.mkShell {{
+        buildInputs = with pkgs; [
+          {pkgs_nix}
+        ];
+      }};
+    }});
+  }};
+}}
+    """
+    with open("flake.nix", "w") as f:
+        f.write(flake_txt)
+    ck_info = calkit.load_calkit_info()
+    # If environments is a list instead of a dict, reformulate it
+    envs = ck_info.get("environments", {})
+    env = dict(
+        kind="nix",
+        wdir=".",
+    )
+    envs[name] = env
+    ck_info["environments"] = envs
+    with open("calkit.yaml", "w") as f:
+        ryaml.dump(ck_info, f)
+    repo = git.Repo()
+    repo.git.add("calkit.yaml")
+    repo.git.add("flake.nix")
+    if repo.git.diff("--staged"):
+        repo.git.commit(["-m", f"Add Nix environment {name}"])
+
+
 @new_app.command("docker-env")
 def new_docker_env(
     name: Annotated[

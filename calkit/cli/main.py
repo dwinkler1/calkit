@@ -1616,6 +1616,15 @@ def run_in_env(
             subprocess.check_call(docker_cmd, cwd=wdir)
         except subprocess.CalledProcessError:
             raise_error("Failed to run in MATLAB environment")
+    elif env["kind"] == "nix":
+        nix_cmd = ["nix", "develop", f".#{env_name}", "-c"]
+        nix_cmd.extend(cmd)
+        if verbose:
+            typer.echo(f"Running command: {nix_cmd}")
+        try:
+            subprocess.check_call(nix_cmd, cwd=wdir)
+        except subprocess.CalledProcessError:
+            raise_error("Failed to run in nix environment")
     else:
         raise_error("Environment kind not supported")
 
