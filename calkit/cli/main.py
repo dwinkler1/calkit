@@ -1617,8 +1617,7 @@ def run_in_env(
         except subprocess.CalledProcessError:
             raise_error("Failed to run in MATLAB environment")
     elif env["kind"] == "nix":
-        nix_cmd = ["nix", "develop", f".#{env_name}", "-c"]
-        nix_cmd.extend(cmd)
+        nix_cmd = ["nix-shell", f"{env_name}.nix", "--run", " ".join(cmd)]
         if verbose:
             typer.echo(f"Running command: {nix_cmd}")
         try:

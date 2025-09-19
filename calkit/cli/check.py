@@ -173,7 +173,7 @@ def check_environment(
             raise_error("Failed to check julia environment")
     elif env["kind"] == "nix":
         try:
-            subprocess.check_call(["nix", "develop", f".#{env_name}", "-c", "echo"])
+            subprocess.check_call(["nix-shell", f"{env_name}.nix", "--run" "echo test"])
         except subprocess.CalledProcessError:
             raise_error("Failed to check nix")
     else:
