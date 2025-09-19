@@ -585,21 +585,21 @@ def new_notebook(
 def new_nix_env(
     name: Annotated[
         str, typer.Option("--name", "-n", help="Environment name.")
-        ],
+    ],
     pkgs: Annotated[
         list[str],
         typer.Argument(help="Packages to include in the environment."),
-      ],
+    ],
     nixpkgs_url: Annotated[
-        str | None, typer.Option(
-            "--nixpkgs-url",
-            help="Nixpkgs URL to use in the nix-shell."
-            )
-      ] = None
+        str | None,
+        typer.Option(
+            "--nixpkgs-url", help="Nixpkgs URL to use in the nix-shell."
+        ),
+    ] = None,
 ):
     pkgs_nix = "\n    ".join(pkgs)
     if nixpkgs_url is None:
-      nixpkgs_url = "https://github.com/NixOS/nixpkgs/tarball/nixos-unstable"
+        nixpkgs_url = "https://github.com/NixOS/nixpkgs/tarball/nixos-unstable"
     shell_txt = f"""
 let
   nixpkgs = fetchTarball "{nixpkgs_url}";
